@@ -1,0 +1,6 @@
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+# Mensajes reales del servidor: nunca se suben
+data/real.csv
