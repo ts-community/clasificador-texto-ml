@@ -2122,3 +2122,36 @@ alguien quiere hablar?,not_looking,add-neg-1
 alguien anda por ahi?,not_looking,add-neg-1
 alguien mas aburrido?,not_looking,add-neg-1
 alguien por aqui?,not_looking,add-neg-1
+alguien juega?,looking,juega-pos-0
+alguien juega,looking,juega-pos-0
+alguien juega algo?,looking,juega-pos-0
+alguien juega ahora?,looking,juega-pos-0
+quien juega?,looking,juega-pos-0
+quien juega,looking,juega-pos-0
+juega alguien?,looking,juega-pos-0
+alguno juega?,looking,juega-pos-0
+alguien juega esta noche?,looking,juega-pos-0
+alguien se apunta a jugar?,looking,juega-pos-0
+alguien juega unas partidas?,looking,juega-pos-1
+quien juega un rato?,looking,juega-pos-1
+alguien juega conmigo?,looking,juega-pos-1
+quien quiere jugar?,looking,juega-pos-1
+alguien para jugar unas?,looking,juega-pos-1
+alguien juega ranked?,looking,juega-pos-1
+jugar todos con @,not_looking,juega-neg-0
+jugar todos conmigo,not_looking,juega-neg-0
+jugad todos con,not_looking,juega-neg-0
+juega conmigo todos,not_looking,juega-neg-0
+todos a jugar con,not_looking,juega-neg-0
+jugar todo el mundo conmigo,not_looking,juega-neg-0
+jugad conmigo,not_looking,juega-neg-0
+todos jugar con,not_looking,juega-neg-0
+jugar con este jugador,not_looking,juega-neg-0
+yo juego con quien sea,not_looking,juega-neg-1
+juego con todos,not_looking,juega-neg-1
+me da igual con quien jugar,not_looking,juega-neg-1
+juego cuando quiero,not_looking,juega-neg-1
+juego solo,not_looking,juega-neg-1
+yo juego solo,not_looking,juega-neg-1
+juego con mis amigos,not_looking,juega-neg-1
+juego con mi equipo,not_looking,juega-neg-1

@@ -91,15 +91,15 @@ imprime, por módulo, el tamaño del modelo y una tabla de calidad con porcentaj
   error rel          6.7%         6.8%
 
 ▍team_search  (looking / not_looking)
-  datos      2123 ejemplos · 259 grupos · looking 926 · not_looking 1197 · modelo 0.21 MB · umbral 0.66
+  datos      2156 ejemplos · 263 grupos · looking 942 · not_looking 1214 · modelo 0.21 MB · umbral 0.78
   métrica      validación       prueba
-  precisión         95.1%        91.8%
+  precisión         95.1%        96.6%
   ...
 
 Resumen  (validación · verde = bien · amarillo = aceptable · rojo = a revisar)
   módulo         ejemplos  umbral  precisión  recall   error    tamaño
   participation      1331   0.640      95.0%   90.7%    6.7%    0.10 MB
-  team_search        2123   0.660      95.1%   87.6%    7.4%    0.21 MB
+  team_search        2156   0.780      95.1%   91.0%    6.0%    0.21 MB
 
 ✔ 2 módulo(s) exportado(s) -> model/
 ```
@@ -164,7 +164,7 @@ node typescript/playground.ts          # menú interactivo
 Calidad (validación) · tamaño
   módulo         ejemplos  umbral  precisión  recall   error    tamaño
   participation      1331   0.640      95.0%   90.7%    6.7%   0.10 MB
-  team_search        2123   0.660      95.1%   87.6%    7.4%   0.21 MB
+  team_search        2156   0.780      95.1%   91.0%    6.0%   0.21 MB
   verde = bien · amarillo = aceptable · rojo = a revisar  ·  detalle en :info
 
 > me apunto al torneo
