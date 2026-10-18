@@ -38,6 +38,10 @@ SEED = 42
 # Suavizado L2 del score (ver detector.ts): evita que una sola palabra genérica
 # ("quiero", "voy"...) dispare el score. Calibrado para no perder recall legítimo.
 SMOOTH = 10.0
+# Precisión objetivo de la clase positiva por módulo (más alto = más estricto: menos
+# falsos positivos a cambio de algo de recall). Sobreescribible con --min-precision.
+MODULE_MIN_PRECISION = {"participation": 0.96}
+DEFAULT_MIN_PRECISION = 0.95
 
 _CODES = {"bold": "1", "dim": "2", "red": "31", "green": "32", "yellow": "33",
           "blue": "34", "magenta": "35", "cyan": "36"}
@@ -208,6 +212,8 @@ def train_module(module, args):
     negative, positive = resolve_labels(df["label"])
     labels = {negative: 0, positive: 1}
     df["y"] = df["label"].map(labels)
+    min_precision = args.min_precision if args.min_precision is not None \
+        else MODULE_MIN_PRECISION.get(module, DEFAULT_MIN_PRECISION)
 
     n_groups = df["group"].nunique()
     n_splits = min(6, n_groups)
@@ -230,7 +236,7 @@ def train_module(module, args):
     oof_idx, p_val = np.concatenate(oof_idx), np.concatenate(oof_p)
     va = df.iloc[oof_idx]
 
-    thr = choose_threshold(va["y"].to_numpy(), p_val, args.min_precision, args.min_threshold)
+    thr = choose_threshold(va["y"].to_numpy(), p_val, min_precision, args.min_threshold)
     pipe = make_pipeline().fit(dev["text"], dev["y"])
     p_te = pipe.predict_proba(te["text"])[:, 1]
 
@@ -276,8 +282,9 @@ def train_module(module, args):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--module", help="entrenar solo este módulo (por defecto, todos)")
-    ap.add_argument("--min-precision", type=float, default=0.95,
-                    help="precisión mínima de la clase positiva en validación para elegir umbral")
+    ap.add_argument("--min-precision", type=float, default=None,
+                    help="precisión mínima de la clase positiva en validación para elegir umbral "
+                         "(por defecto: 0.95, o el valor propio del módulo)")
     ap.add_argument("--min-threshold", type=float, default=0.5,
                     help="suelo del umbral: no baja de aquí aunque logre la precisión mínima")
     args = ap.parse_args()

@@ -37,6 +37,10 @@ Módulos incluidos:
   ajenos** etiquetados como negativos (charla, dudas, "quiero comer", "me voy"...). Así una frase que no
   va del tema da un porcentaje muy bajo aunque contenga palabras comunes ("quiero", "voy"), y es muy
   difícil que dispare un falso positivo.
+- Los mensajes que son **solo muletillas** ("ok", "vale", "yo", "si", "Tamb"...) nunca deciden positivo:
+  no expresan intención por sí solos.
+- La **precisión objetivo** puede ajustarse por módulo (`MODULE_MIN_PRECISION` en `train.py`, o
+  `--min-precision`). `participation` es más estricto (96%): en la duda, `not_joining`.
 
 ## Estructura
 
@@ -81,14 +85,14 @@ imprime, por módulo, el tamaño del modelo y una tabla de calidad con porcentaj
 ╰────────────────────╯
 
 ▍participation  (joining / not_joining)
-  datos      1331 ejemplos · 263 grupos · joining 633 · not_joining 698 · modelo 0.10 MB · umbral 0.64
+  datos      1331 ejemplos · 263 grupos · joining 633 · not_joining 698 · modelo 0.10 MB · umbral 0.755
   métrica      validación       prueba
-  precisión         95.0%        91.0%
-  recall            90.7%        95.3%
-  F1                92.8%        93.1%
-  aciertos          93.3%        93.2%
-  error abs            74           15
-  error rel          6.7%         6.8%
+  precisión         96.1%        93.5%
+  recall            84.4%        94.3%
+  F1                89.9%        93.9%
+  aciertos          91.0%        94.1%
+  error abs           100           13
+  error rel          9.0%         5.9%
 
 ▍team_search  (looking / not_looking)
   datos      2156 ejemplos · 263 grupos · looking 942 · not_looking 1214 · modelo 0.21 MB · umbral 0.78
@@ -98,7 +102,7 @@ imprime, por módulo, el tamaño del modelo y una tabla de calidad con porcentaj
 
 Resumen  (validación · verde = bien · amarillo = aceptable · rojo = a revisar)
   módulo         ejemplos  umbral  precisión  recall   error    tamaño
-  participation      1331   0.640      95.0%   90.7%    6.7%    0.10 MB
+  participation      1331   0.755      96.1%   84.4%    9.0%    0.10 MB
   team_search        2156   0.780      95.1%   91.0%    6.0%    0.21 MB
 
 ✔ 2 módulo(s) exportado(s) -> model/
@@ -163,7 +167,7 @@ node typescript/playground.ts          # menú interactivo
 
 Calidad (validación) · tamaño
   módulo         ejemplos  umbral  precisión  recall   error    tamaño
-  participation      1331   0.640      95.0%   90.7%    6.7%   0.10 MB
+  participation      1331   0.755      96.1%   84.4%    9.0%   0.10 MB
   team_search        2156   0.780      95.1%   91.0%    6.0%   0.21 MB
   verde = bien · amarillo = aceptable · rojo = a revisar  ·  detalle en :info
 
@@ -189,14 +193,14 @@ tarda. Comandos:
 
 ```
 participation  (joining / not_joining)
-  datos     1331 ejemplos · participation.json · 0.10 MB · umbral 0.64 · entrenado 2026-10-18
+  datos     1331 ejemplos · participation.json · 0.10 MB · umbral 0.755 · entrenado 2026-10-18
   métrica      validación       prueba
-  precisión         95.0%        91.0%
-  recall            90.7%        95.3%
-  F1                92.8%        93.1%
-  aciertos          93.3%        93.2%
-  error abs            74           15
-  error rel          6.7%         6.8%
+  precisión         96.1%        93.5%
+  recall            84.4%        94.3%
+  F1                89.9%        93.9%
+  aciertos          91.0%        94.1%
+  error abs           100           13
+  error rel          9.0%         5.9%
 ```
 
 También sin menú:

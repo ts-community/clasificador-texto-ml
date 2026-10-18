@@ -68,6 +68,15 @@ interface Block {
 const COMBINING = /[\u0300-\u036f\u1ab0-\u1aff\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]/g;
 const WORD = /[\p{L}\p{N}_]{2,}/gu;
 
+// Muletillas que por sí solas no expresan intención: si el mensaje es solo esto, no decide
+// positivo (evita falsos positivos con "ok", "vale", "yo", "si"...). Igual que en train.py.
+const FILLERS = new Set([
+  "ok", "okey", "oki", "vale", "si", "sii", "no", "ya", "yo", "me", "vamos", "eh", "uh",
+  "xd", "jaja", "jeje", "bueno", "genial", "perfecto", "dale", "eso", "que", "tambien",
+  "tamb", "tb", "tmb", "y", "a", "gracias", "buenas", "hola", "hey", "epa", "wep",
+]);
+
+
 // Igual que TfidfVectorizer(lowercase=True, strip_accents="unicode")
 function preprocess(text: string): string {
   return text.toLowerCase().normalize("NFKD").replace(COMBINING, "");
@@ -151,6 +160,9 @@ export class TextDetector {
 
   score(text: string): number {
     const t = preprocess(text);
+    // Si el mensaje es solo muletillas ("ok", "vale", "yo", "si"...), no hay intención: score 0.
+    const words = t.match(WORD) ?? [];
+    if (words.length > 0 && words.every((w) => FILLERS.has(w))) return 0;
     const wordContrib = contribution(this.words, wordNgrams(t, this.words.range), this.smooth);
     const charContrib = contribution(this.chars, charWbNgrams(t, this.chars.range), this.smooth);
     const z = this.intercept + wordContrib + charContrib;
