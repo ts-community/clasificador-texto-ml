@@ -1,8 +1,9 @@
 # clasificador-texto-ml
 
-Clasificador de texto **local, offline y sin dependencias**: le das etiquetas y devuelve un
-**porcentaje por etiqueta**. Machine learning clásico (**TF-IDF + regresión logística**) entrenado en
-Python e inferido en TypeScript puro, a ~0,03 ms por mensaje. No es una red neuronal ni un LLM.
+Detector de intenciones para Discord con **NLP clásico**: le das etiquetas y devuelve un **porcentaje
+por etiqueta**, local, offline y sin dependencias. Machine learning (**TF-IDF + regresión logística**)
+entrenado en Python e inferido en TypeScript puro, a ~0,03 ms por mensaje. No es una red neuronal ni un
+LLM.
 
 Cada **módulo** es un clasificador independiente entrenado con tus ejemplos. Sirve, por ejemplo, para que
 un bot de Discord mencione un rol solo cuando alguien pide algo de verdad.
