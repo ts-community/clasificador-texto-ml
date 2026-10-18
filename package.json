@@ -1,0 +1,17 @@
+{
+  "name": "clasificador-texto-ml",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@12.3.4",
+  "description": "Clasificador de texto local y sin dependencias: le das etiquetas y devuelve un porcentaje por etiqueta. Machine learning clásico (TF-IDF + regresión logística) entrenado en Python e inferido en TypeScript.",
+  "scripts": {
+    "train": "node tools/python.mjs train.py",
+    "playground": "node typescript/playground.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "typescript": "^5.9.3"
+  }
+}
