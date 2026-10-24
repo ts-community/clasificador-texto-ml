@@ -40,6 +40,9 @@ Módulos incluidos:
 - Los mensajes que son **solo muletillas o palabras funcionales** ("ok", "vale", "en", "aqui"...) o
   **solo tiempo** ("30 min", "en 5 minutos") nunca deciden positivo: no expresan intención por sí solos.
   Además, `en` se excluye como palabra del TF-IDF porque sesgaba frases como "en 30 min".
+- Las **erratas de una sola letra** no hunden la detección: si una palabra no está en el vocabulario, se
+  corrige a la palabra conocida más parecida (inserción, borrado, cambio o dos letras intercambiadas).
+  Así `laguien juega?` se lee como `alguien juega?`; una palabra válida nunca se toca.
 - La **precisión objetivo** puede ajustarse por módulo (`MODULE_MIN_PRECISION` en `train.py`, o
   `--min-precision`). `participation` es más estricto (96%): en la duda, `not_joining`.
 
@@ -96,15 +99,15 @@ imprime, por módulo, el tamaño del modelo y una tabla de calidad con porcentaj
   error rel          8.1%         5.4%
 
 ▍team_search  (looking / not_looking)
-  datos      2156 ejemplos · 263 grupos · looking 942 · not_looking 1214 · modelo 0.21 MB · umbral 0.75
+  datos      2168 ejemplos · 265 grupos · looking 942 · not_looking 1226 · modelo 0.21 MB · umbral 0.67
   métrica      validación       prueba
-  precisión         95.0%        96.0%
+  precisión         95.2%        96.8%
   ...
 
 Resumen  (validación · verde = bien · amarillo = aceptable · rojo = a revisar)
   módulo         ejemplos  umbral  precisión  recall   error    tamaño
   participation      1331   0.740      96.2%   86.3%    8.1%    0.10 MB
-  team_search        2156   0.750      95.0%   92.0%    5.6%    0.21 MB
+  team_search        2168   0.670      95.2%   90.8%    6.0%    0.21 MB
 
 ✔ 2 módulo(s) exportado(s) -> model/
 ```
@@ -172,7 +175,7 @@ node typescript/playground.ts          # menú interactivo
 Calidad (validación) · tamaño
   módulo         ejemplos  umbral  precisión  recall   error    tamaño
   participation      1331   0.740      96.2%   86.3%    8.1%   0.10 MB
-  team_search        2156   0.750      95.0%   92.0%    5.6%   0.21 MB
+  team_search        2168   0.670      95.2%   90.8%    6.0%   0.21 MB
   verde = bien · amarillo = aceptable · rojo = a revisar  ·  detalle en :info
 
 > me apunto al torneo
@@ -180,7 +183,7 @@ Calidad (validación) · tamaño
     probabilidad  98.1%   umbral 74.0%   (supera)
     tiempo        0.24 ms
   team_search    →  not_looking
-    probabilidad   1.4%   umbral 75.0%   (no llega)
+    probabilidad   1.3%   umbral 67.0%   (no llega)
     tiempo        0.20 ms
 ```
 
@@ -294,6 +297,7 @@ sin menciones, IDs ni datos personales. `train.py` lo usa automáticamente y el 
 
 - Entiende palabras y trozos de palabra, no el significado: una forma de pedir algo que no se parezca a
   ninguna de los datos puede no detectarse. Negaciones como `no participo` se aprenden por contexto léxico.
+- Corrige erratas de una letra en palabras sueltas; con dos o más erratas puede seguir fallando.
 - Cada módulo necesita ejemplos etiquetados y su propio modelo; no clasifica etiquetas que no haya visto.
 - Los datos incluidos son sintéticos, así que las métricas que imprime son orientativas. Valídalos con
   mensajes reales de tu servidor.
