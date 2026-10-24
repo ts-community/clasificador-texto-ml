@@ -16,6 +16,7 @@ Uso:
     python train.py --module participation
 """
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -38,6 +39,10 @@ SEED = 42
 # Suavizado L2 del score (ver detector.ts): evita que una sola palabra genérica
 # ("quiero", "voy"...) dispare el score. Calibrado para no perder recall legítimo.
 SMOOTH = 10.0
+# Palabras funcionales que no aportan intención y sesgan el score: "en 30 min" se
+# parecía a "participo en el torneo" solo por el "en". Se excluyen del bloque de
+# palabras (los n-gramas de carácter se mantienen).
+STOP_WORDS = ["en"]
 # Precisión objetivo de la clase positiva por módulo (más alto = más estricto: menos
 # falsos positivos a cambio de algo de recall). Sobreescribible con --min-precision.
 MODULE_MIN_PRECISION = {"participation": 0.96}
@@ -95,7 +100,7 @@ def enable_ansi():
 
 def make_pipeline():
     words = TfidfVectorizer(strip_accents="unicode", lowercase=True, ngram_range=(1, 2), min_df=2,
-                            sublinear_tf=True)
+                            sublinear_tf=True, stop_words=STOP_WORDS)
     chars = TfidfVectorizer(strip_accents="unicode", lowercase=True, analyzer="char_wb", ngram_range=(2, 5),
                             min_df=2, sublinear_tf=True)
     return Pipeline([
@@ -126,6 +131,15 @@ def resolve_labels(labels):
     negative = neg[0]
     positive = next(v for v in values if v != negative)
     return negative, positive
+
+
+def data_hash(module):
+    """Huella de los CSV que alimentan el módulo, para detectar modelos desactualizados."""
+    h = hashlib.sha256()
+    for path in (DATA_DIR / f"{module}.csv", DATA_DIR / f"{module}.real.csv"):
+        if path.exists():
+            h.update(path.read_bytes())
+    return h.hexdigest()
 
 
 def load_data(module):
@@ -197,7 +211,7 @@ def export(pipe, threshold, module, negative, positive, path, metrics):
     out = {"version": 4, "module": module, "labels": [negative, positive],
            "negative": negative, "positive": positive, "threshold": threshold,
            "intercept": r6(pipe.named_steps["lr"].intercept_[0]), "smooth": SMOOTH,
-           "metrics": metrics}
+           "data_hash": data_hash(module), "metrics": metrics}
     offset = 0
     for name in ("words", "chars"):
         vec = feats[name]

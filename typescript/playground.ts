@@ -9,7 +9,8 @@
  *   node typescript/playground.ts -t 0.5 "puedo participar?"
  */
 import { createInterface } from "node:readline";
-import { statSync } from "node:fs";
+import { createHash } from "node:crypto";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { styleText } from "node:util";
 import { DetectorSet, type SetPrediction, type SplitMetrics } from "./detector.ts";
@@ -19,6 +20,7 @@ const c = (fmt: Fmt, value: string | number): string => styleText(fmt, String(va
 
 interface Args {
   dir: string;
+  data: string;
   modules: string[];
   threshold?: number;
   phrases: string[];
@@ -63,11 +65,61 @@ function printGlossary(only?: string[]): void {
   }
 }
 
+interface StaleModel {
+  module: string;
+  reason: string;
+}
+
+function dataModules(dir: string): string[] {
+  if (!existsSync(dir)) return [];
+  return readdirSync(dir)
+    .filter((file) => file.endsWith(".csv") && !file.endsWith(".real.csv"))
+    .map((file) => file.slice(0, -4));
+}
+
+function hashData(module: string, dir: string): string | undefined {
+  const hash = createHash("sha256");
+  let found = false;
+  for (const file of [`${module}.csv`, `${module}.real.csv`]) {
+    const path = join(dir, file);
+    if (!existsSync(path)) continue;
+    found = true;
+    hash.update(readFileSync(path));
+  }
+  return found ? hash.digest("hex") : undefined;
+}
+
+function staleModels(set: DetectorSet, dir: string): StaleModel[] {
+  const stale: StaleModel[] = [];
+  for (const module of dataModules(dir)) {
+    const detector = set.get(module);
+    if (!detector) {
+      stale.push({ module, reason: `falta model/${module}.json` });
+      continue;
+    }
+    const hash = hashData(module, dir);
+    if (!hash) continue;
+    if (!detector.dataHash) stale.push({ module, reason: "el modelo no guarda la huella de los datos" });
+    else if (detector.dataHash !== hash) stale.push({ module, reason: "los datos cambiaron desde el entrenamiento" });
+  }
+  return stale;
+}
+
+function warnStale(stale: StaleModel[]): void {
+  if (!stale.length) return;
+  console.log(`\n${c(["bold", "yellow"], "⚠ Modelos desactualizados")}`);
+  for (const { module, reason } of stale) {
+    console.log(`  ${c("yellow", module.padEnd(14))} ${c("dim", reason)}`);
+  }
+  console.log(`  ${c("dim", "Ejecuta")} ${c("bold", "pnpm train")} ${c("dim", "y vuelve a probar.")}`);
+}
+
 function parseArgs(argv: string[]): Args {
-  const args: Args = { dir: "model", modules: [], phrases: [] };
+  const args: Args = { dir: "model", data: "data", modules: [], phrases: [] };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--dir" || a === "-d") args.dir = argv[++i];
+    else if (a === "--data" || a === "-D") args.data = argv[++i];
     else if (a === "--module" || a === "-m") args.modules.push(...argv[++i].split(",").map((s) => s.trim()).filter(Boolean));
     else if (a === "--threshold" || a === "-t") args.threshold = Number(argv[++i]);
     else if (a === "--help" || a === "-h") {
@@ -75,6 +127,7 @@ function parseArgs(argv: string[]): Args {
 
 Opciones:
   -d, --dir <ruta>        carpeta de modelos (por defecto: model)
+  -D, --data <ruta>       carpeta de datasets para comprobar frescura (por defecto: data)
   -m, --module <nombre>   limita a uno o varios módulos (separados por coma)
   -t, --threshold <0..1>  sobrescribe el umbral de todos los módulos
 
@@ -260,8 +313,10 @@ if (!set.names().length) {
 }
 
 const session = new Session(set, args);
+const stale = staleModels(set, args.data);
 
 if (args.phrases.length) {
+  warnStale(stale);
   session.qualityTable();
   console.log(`\n${c("dim", "probabilidad = confianza en la etiqueta positiva · umbral = mínimo para marcarla")}`);
   for (const phrase of args.phrases) {
@@ -272,6 +327,7 @@ if (args.phrases.length) {
 }
 
 banner("Clasificador de texto", session.status());
+warnStale(stale);
 session.qualityTable();
 console.log(`\n${c("dim", "probabilidad = confianza en la etiqueta positiva · umbral = mínimo para marcarla")}`);
 console.log(`Escribe una frase, o ${c("bold", ":help")} para los comandos.`);

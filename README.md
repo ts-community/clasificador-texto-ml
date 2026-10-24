@@ -37,8 +37,9 @@ Módulos incluidos:
   ajenos** etiquetados como negativos (charla, dudas, "quiero comer", "me voy"...). Así una frase que no
   va del tema da un porcentaje muy bajo aunque contenga palabras comunes ("quiero", "voy"), y es muy
   difícil que dispare un falso positivo.
-- Los mensajes que son **solo muletillas** ("ok", "vale", "yo", "si", "Tamb"...) nunca deciden positivo:
-  no expresan intención por sí solos.
+- Los mensajes que son **solo muletillas o palabras funcionales** ("ok", "vale", "en", "aqui"...) o
+  **solo tiempo** ("30 min", "en 5 minutos") nunca deciden positivo: no expresan intención por sí solos.
+  Además, `en` se excluye como palabra del TF-IDF porque sesgaba frases como "en 30 min".
 - La **precisión objetivo** puede ajustarse por módulo (`MODULE_MIN_PRECISION` en `train.py`, o
   `--min-precision`). `participation` es más estricto (96%): en la duda, `not_joining`.
 
@@ -85,25 +86,25 @@ imprime, por módulo, el tamaño del modelo y una tabla de calidad con porcentaj
 ╰────────────────────╯
 
 ▍participation  (joining / not_joining)
-  datos      1331 ejemplos · 263 grupos · joining 633 · not_joining 698 · modelo 0.10 MB · umbral 0.755
+  datos      1331 ejemplos · 263 grupos · joining 633 · not_joining 698 · modelo 0.10 MB · umbral 0.74
   métrica      validación       prueba
-  precisión         96.1%        93.5%
-  recall            84.4%        94.3%
-  F1                89.9%        93.9%
-  aciertos          91.0%        94.1%
-  error abs           100           13
-  error rel          9.0%         5.9%
+  precisión         96.2%        93.5%
+  recall            86.3%        95.3%
+  F1                91.0%        94.4%
+  aciertos          91.9%        94.6%
+  error abs            90           12
+  error rel          8.1%         5.4%
 
 ▍team_search  (looking / not_looking)
-  datos      2156 ejemplos · 263 grupos · looking 942 · not_looking 1214 · modelo 0.21 MB · umbral 0.78
+  datos      2156 ejemplos · 263 grupos · looking 942 · not_looking 1214 · modelo 0.21 MB · umbral 0.75
   métrica      validación       prueba
-  precisión         95.1%        96.6%
+  precisión         95.0%        96.0%
   ...
 
 Resumen  (validación · verde = bien · amarillo = aceptable · rojo = a revisar)
   módulo         ejemplos  umbral  precisión  recall   error    tamaño
-  participation      1331   0.755      96.1%   84.4%    9.0%    0.10 MB
-  team_search        2156   0.780      95.1%   91.0%    6.0%    0.21 MB
+  participation      1331   0.740      96.2%   86.3%    8.1%    0.10 MB
+  team_search        2156   0.750      95.0%   92.0%    5.6%    0.21 MB
 
 ✔ 2 módulo(s) exportado(s) -> model/
 ```
@@ -156,6 +157,9 @@ más y mejores ejemplos**, no tocar el umbral.
 Requiere Node 24+ (ejecuta los `.ts` directamente, sin compilar). No hay dependencias en tiempo de
 ejecución; `pnpm install` solo instala TypeScript para el typecheck opcional.
 
+Al arrancar compara una huella SHA-256 de los CSV de `data/` con la guardada en cada modelo. Si cambiaste
+los datos sin reentrenar, avisa con `⚠ Modelos desactualizados` y sugiere ejecutar `pnpm train`.
+
 ```powershell
 node typescript/playground.ts          # menú interactivo
 ```
@@ -167,16 +171,16 @@ node typescript/playground.ts          # menú interactivo
 
 Calidad (validación) · tamaño
   módulo         ejemplos  umbral  precisión  recall   error    tamaño
-  participation      1331   0.755      96.1%   84.4%    9.0%   0.10 MB
-  team_search        2156   0.780      95.1%   91.0%    6.0%   0.21 MB
+  participation      1331   0.740      96.2%   86.3%    8.1%   0.10 MB
+  team_search        2156   0.750      95.0%   92.0%    5.6%   0.21 MB
   verde = bien · amarillo = aceptable · rojo = a revisar  ·  detalle en :info
 
 > me apunto al torneo
   participation  →  joining
-    probabilidad  98.2%   umbral 64.5%   (supera)
+    probabilidad  98.1%   umbral 74.0%   (supera)
     tiempo        0.24 ms
   team_search    →  not_looking
-    probabilidad   1.5%   umbral 66.0%   (no llega)
+    probabilidad   1.4%   umbral 75.0%   (no llega)
     tiempo        0.20 ms
 ```
 
@@ -193,14 +197,14 @@ tarda. Comandos:
 
 ```
 participation  (joining / not_joining)
-  datos     1331 ejemplos · participation.json · 0.10 MB · umbral 0.755 · entrenado 2026-10-18
+  datos     1331 ejemplos · participation.json · 0.10 MB · umbral 0.74 · entrenado 2026-10-24
   métrica      validación       prueba
-  precisión         96.1%        93.5%
-  recall            84.4%        94.3%
-  F1                89.9%        93.9%
-  aciertos          91.0%        94.1%
-  error abs           100           13
-  error rel          9.0%         5.9%
+  precisión         96.2%        93.5%
+  recall            86.3%        95.3%
+  F1                91.0%        94.4%
+  aciertos          91.9%        94.6%
+  error abs            90           12
+  error rel          8.1%         5.4%
 ```
 
 También sin menú:
