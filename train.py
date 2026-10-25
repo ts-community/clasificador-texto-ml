@@ -39,13 +39,16 @@ SEED = 42
 # Suavizado L2 del score (ver detector.ts): evita que una sola palabra genérica
 # ("quiero", "voy"...) dispare el score. Calibrado para no perder recall legítimo.
 SMOOTH = 10.0
+# Regularización de la regresión logística: más bajo = coeficientes más pequeños y menos
+# dependencia de palabras sueltas (evita que "al", "por aquí"... hundan frases válidas).
+LR_C = 10.0
 # Palabras funcionales que no aportan intención y sesgan el score: "en 30 min" se
 # parecía a "participo en el torneo" solo por el "en". Se excluyen del bloque de
 # palabras (los n-gramas de carácter se mantienen).
-STOP_WORDS = ["en"]
+STOP_WORDS = ["en", "al", "por", "aqui", "aca"]
 # Precisión objetivo de la clase positiva por módulo (más alto = más estricto: menos
 # falsos positivos a cambio de algo de recall). Sobreescribible con --min-precision.
-MODULE_MIN_PRECISION = {"participation": 0.96}
+MODULE_MIN_PRECISION = {"participation": 0.96, "team_search": 0.93}
 DEFAULT_MIN_PRECISION = 0.95
 
 _CODES = {"bold": "1", "dim": "2", "red": "31", "green": "32", "yellow": "33",
@@ -105,7 +108,7 @@ def make_pipeline():
                             min_df=2, sublinear_tf=True)
     return Pipeline([
         ("features", FeatureUnion([("words", words), ("chars", chars)])),
-        ("lr", LogisticRegression(C=10, class_weight="balanced", max_iter=2000)),
+        ("lr", LogisticRegression(C=LR_C, class_weight="balanced", max_iter=2000)),
     ])
 
 

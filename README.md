@@ -39,12 +39,14 @@ Módulos incluidos:
   difícil que dispare un falso positivo.
 - Los mensajes que son **solo muletillas o palabras funcionales** ("ok", "vale", "en", "aqui"...) o
   **solo tiempo** ("30 min", "en 5 minutos") nunca deciden positivo: no expresan intención por sí solos.
-  Además, `en` se excluye como palabra del TF-IDF porque sesgaba frases como "en 30 min".
+  Además, se excluyen `en`, `al`, `por`, `aquí` y `acá` como palabras del TF-IDF porque sesgaban frases
+  como "en 30 min", "interesados al dm" o "por aquí".
 - Las **erratas de una sola letra** no hunden la detección: si una palabra no está en el vocabulario, se
   corrige a la palabra conocida más parecida (inserción, borrado, cambio o dos letras intercambiadas).
   Así `laguien juega?` se lee como `alguien juega?`; una palabra válida nunca se toca.
 - La **precisión objetivo** puede ajustarse por módulo (`MODULE_MIN_PRECISION` en `train.py`, o
-  `--min-precision`). `participation` es más estricto (96%): en la duda, `not_joining`.
+  `--min-precision`). `participation` es más estricto (96%): en la duda, `not_joining`. `team_search`
+  usa 93% para no perder recall con búsquedas cortas.
 
 ## Estructura
 
@@ -99,15 +101,15 @@ imprime, por módulo, el tamaño del modelo y una tabla de calidad con porcentaj
   error rel          8.1%         5.4%
 
 ▍team_search  (looking / not_looking)
-  datos      2168 ejemplos · 265 grupos · looking 942 · not_looking 1226 · modelo 0.21 MB · umbral 0.67
+  datos      2213 ejemplos · 270 grupos · looking 979 · not_looking 1234 · modelo 0.21 MB · umbral 0.655
   métrica      validación       prueba
-  precisión         95.2%        96.8%
+  precisión         93.0%       100.0%
   ...
 
 Resumen  (validación · verde = bien · amarillo = aceptable · rojo = a revisar)
   módulo         ejemplos  umbral  precisión  recall   error    tamaño
   participation      1331   0.740      96.2%   86.3%    8.1%    0.10 MB
-  team_search        2168   0.670      95.2%   90.8%    6.0%    0.21 MB
+  team_search        2213   0.655      93.0%   88.5%    8.0%    0.21 MB
 
 ✔ 2 módulo(s) exportado(s) -> model/
 ```
@@ -175,7 +177,7 @@ node typescript/playground.ts          # menú interactivo
 Calidad (validación) · tamaño
   módulo         ejemplos  umbral  precisión  recall   error    tamaño
   participation      1331   0.740      96.2%   86.3%    8.1%   0.10 MB
-  team_search        2168   0.670      95.2%   90.8%    6.0%   0.21 MB
+  team_search        2213   0.655      93.0%   88.5%    8.0%   0.21 MB
   verde = bien · amarillo = aceptable · rojo = a revisar  ·  detalle en :info
 
 > me apunto al torneo
@@ -183,7 +185,7 @@ Calidad (validación) · tamaño
     probabilidad  98.1%   umbral 74.0%   (supera)
     tiempo        0.24 ms
   team_search    →  not_looking
-    probabilidad   1.3%   umbral 67.0%   (no llega)
+    probabilidad   1.3%   umbral 65.5%   (no llega)
     tiempo        0.20 ms
 ```
 
